@@ -1,5 +1,6 @@
 package com.mtcoding.boardproject.domain.board;
 
+import com.mtcoding.boardproject.domain.user.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
@@ -20,7 +21,7 @@ public class BoardRepository {
     public List<Board> findAll() {
         // 네이티브 SQL 실행 (엔티티가 아닌, DB 테이블/컬럼 명을 그대로 사용)
         Query query = em.createNativeQuery(
-                "select id, title, content from board_tb order by id desc");
+                "select id, title, content, user_id from board_tb order by id desc");
 
         // 네이티브 쿼리의 기본 반환 타입은 Object[] (각 로우가 컬럼 배열)
         List<Object[]> obsList = query.getResultList();
@@ -33,87 +34,70 @@ public class BoardRepository {
             Integer v1 = (Integer) obs[0]; // id
             String v2 = (String)  obs[1];  // title
             String v3 = (String)  obs[2];  // content
+            Integer v4 = (Integer)  obs[3];
+
+            User user = new User(v4, null, null, null);
 
             // (전제) Board에 (Integer, String, String)을 받는 생성자가 있어야 함
-            Board board = new Board(v1, v2, v3);
+            Board board = new Board(v1, v2, v3, user);
             boardList.add(board);
         }
         return boardList;
     }
 
+    // DB에서 id로 조회해서 Board로 매핑해서 리턴하기
     public Board findById(int id) {
-        // 위치 기반 파라미터(?)를 사용하는 네이티브 SQL
-        Query query = em.createNativeQuery(
-                "select id, title, content from board_tb where id = ?");
+        String sql = """
+                select bt.id, bt.title, bt.content, ut.id, ut.username, ut.password, ut.email  
+                from board_tb bt inner join user_tb ut on bt.user_id = ut.id 
+                where bt.id = ?
+                """;
 
-        // 1번 인덱스 파라미터에 id 바인딩 (JPA는 1부터 시작)
+        Query query = em.createNativeQuery(sql);
         query.setParameter(1, id);
 
         try {
-            // 단건 조회: 결과가 없거나 여러 건이면 예외 발생 가능
             Object[] obs = (Object[]) query.getSingleResult();
 
-            Integer v1 = (Integer) obs[0]; // id
-            String v2 = (String)  obs[1];  // title
-            String v3 = (String)  obs[2];  // content
+            Integer v1 = (Integer) obs[0];
+            String v2 = (String) obs[1];
+            String v3 = (String) obs[2];
+            Integer v4 = (Integer) obs[3];
+            String v5 = (String) obs[4];
+            String v6 =  (String) obs[5];
+            String v7 = (String) obs[6];
 
-            return new Board(v1, v2, v3);
+            // ORM -> 왜? 객체로 관리하는게 좋다.
+            User user = new User(v4, v5, v6, v7);
+            Board board = new Board(v1, v2, v3, user);
+            return board;
         } catch (RuntimeException e) {
-            // NoResultException, NonUniqueResultException 등 런타임 예외를 포괄 처리
-            // 없으면 null 반환 (호출 측에서 null 처리/Optional 변환 고려)
             return null;
         }
-    }
-
-
-    public List<Board> findAllV2() {
-        // 네이티브 SQL + 엔티티 매핑 방식
-        // createNativeQuery(sql, Board.class) 를 쓰면 결과를 Board 엔티티로 매핑해 준다.
-        // ⚠️ 주의: SELECT 컬럼이 엔티티 매핑 컬럼과 이름/타입이 맞아야 한다.
-        //          (누락되면 매핑 오류 가능. 안전하게는 SELECT * 또는 컬럼 alias를 엔티티 컬럼명에 맞추기)
-        Query query = em.createNativeQuery(
-                "select id, title, content from board_tb order by id desc",
-                Board.class // 결과를 Board 엔티티로 매핑
-        );
-
-        // 결과는 Board 엔티티 리스트로 리턴됨 (캐스팅 없이 사용 가능)
-        return query.getResultList();
     }
 
     public Board findByIdV2(int id) {
-        // 단건 조회용 네이티브 SQL + 엔티티 매핑
-        Query query = em.createNativeQuery(
-                "select id, title, content from board_tb where id = ?",
-                Board.class // 결과를 Board 엔티티로 매핑
-        );
+        Query query = em.createQuery("select b from Board b join fetch b.user where b.id = :id", Board.class);
+        query.setParameter("id", id);
 
-        // 위치 기반 파라미터 바인딩 (JPA는 1부터 시작)
-        query.setParameter(1, id);
-
-        try {
-            // 단건 조회. 결과 없으면 NoResultException 등 런타임 예외 발생 가능
-            return (Board) query.getSingleResult();
-        } catch (RuntimeException e) {
-            // 조회 결과 없음(또는 복수 건 등) 상황을 null로 처리
-            // 실전에서는 Optional<Board> 반환을 고려하거나 예외를 명확히 구분해 처리 권장
-            return null;
-        }
+        return (Board) query.getSingleResult();
     }
 
     // 게시글 저장 (네이티브 SQL 사용)
     @Transactional // 데이터 변경 쿼리는 트랜잭션 안에서 수행되어야 함
-    public void save(String title, String content) {
+    public void save(String title, String content, int userId) {
         // createNativeQuery(sql):
         // - 네이티브 SQL을 실행하기 위해 Query 객체를 생성
         // - INSERT/UPDATE/DELETE 처럼 "결과 집합(ResultSet)이 없는" 쿼리는
         //   엔티티 매핑 클래스(Board.class) 지정이 필요 없다.
         Query query = em.createNativeQuery(
-                "insert into board_tb (title, content) values (?, ?)"
+                "insert into board_tb (title, content, userId) values (?, ?, ?)"
         );
 
         // 위치 기반 파라미터 바인딩 (JPA는 1부터 시작)
         query.setParameter(1, title);
         query.setParameter(2, content);
+        query.setParameter(3, userId);
 
         // executeUpdate():
         // - INSERT/UPDATE/DELETE 수행 시 영향받은 행 수(int)를 반환

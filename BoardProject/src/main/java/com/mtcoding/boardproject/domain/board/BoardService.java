@@ -51,7 +51,7 @@ public class BoardService {
 
     @Transactional
     public void 게시글쓰기(BoardSaveRequestDTO reqDTO) {
-        boardRepository.save(reqDTO.getTitle(), reqDTO.getContent());
+        boardRepository.save(reqDTO.getTitle(), reqDTO.getContent(), 1);
     }
 
     @Transactional

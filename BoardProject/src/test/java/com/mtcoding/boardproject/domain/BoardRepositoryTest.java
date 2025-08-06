@@ -33,7 +33,7 @@ public class BoardRepositoryTest {
     @Test
     public void findById_test() {
         // given
-        int id = 6;
+        int id = 1;
 
         // when
         Board board = boardRepository.findById(id);
@@ -45,28 +45,20 @@ public class BoardRepositoryTest {
             System.out.println(board.getId());
             System.out.println(board.getTitle());
             System.out.println(board.getContent());
-        }
-    }
-
-    @Test
-    public void findAllV2_test() {
-        // given
-        // when
-        List<Board> boardList = boardRepository.findAllV2();
-        for (Board board : boardList) {
-            System.out.println(board.getId());
-            System.out.println(board.getTitle());
-            System.out.println(board.getContent());
+            System.out.println(board.getUser().getId());
+            System.out.println(board.getUser().getUsername());
+            System.out.println(board.getUser().getPassword());
+            System.out.println(board.getUser().getEmail());
         }
     }
 
     @Test
     public void findByIdV2_test() {
         // given
-        int id = 2;
+        int id = 1;
 
         // when
-        Board board = boardRepository.findByIdV2(id);
+        Board board = boardRepository.findById(id);
 
         // eye (눈으로 검증하기)
         if (board == null) {
@@ -75,8 +67,24 @@ public class BoardRepositoryTest {
             System.out.println(board.getId());
             System.out.println(board.getTitle());
             System.out.println(board.getContent());
+            System.out.println(board.getUser().getId());
+            System.out.println(board.getUser().getUsername());
+            System.out.println(board.getUser().getPassword());
+            System.out.println(board.getUser().getEmail());
         }
     }
+
+//    @Test
+//    public void findAllV2_test() {
+//        // given
+//        // when
+//        List<Board> boardList = boardRepository.findAllV2();
+//        for (Board board : boardList) {
+//            System.out.println(board.getId());
+//            System.out.println(board.getTitle());
+//            System.out.println(board.getContent());
+//        }
+//    }
 
     @Test
     public void save_test() {
@@ -85,7 +93,7 @@ public class BoardRepositoryTest {
         String content = "내용5";
 
         // when
-        boardRepository.save(title, content);
+        boardRepository.save(title, content, 1);
 
         // eye
         Board findBoard = boardRepository.findById(5);

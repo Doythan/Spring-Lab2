@@ -1,5 +1,15 @@
-INSERT INTO board_tb (title, content) VALUES ('첫 글', '스프링부트 + H2 연결 확인!');
-INSERT INTO board_tb (title, content) VALUES ('둘째 글', 'JPA로 테이블 자동 생성 완료.');
-INSERT INTO board_tb (title, content) VALUES ('셋째 글', '도경원 자바 초보');
-INSERT INTO board_tb (title, content) VALUES ('넷째 글', '도경원 자바 중급');
-INSERT INTO board_tb (title, content) VALUES ('다섯째 글', '도경원 자바 고급');
+insert into user_tb(username, password, email)
+values ('ssar', '1234', 'ssar@nate.com');
+insert into user_tb(username, password, email)
+values ('cos', '1234', 'cos@nate.com');
+
+insert into board_tb(title, content, user_id)
+values ('제목1', '내용1', 1);
+insert into board_tb(title, content, user_id)
+values ('제목2', '내용2', 1);
+insert into board_tb(title, content, user_id)
+values ('제목3', '내용3', 1);
+insert into board_tb(title, content, user_id)
+values ('제목4', '내용4', 1);
+insert into board_tb(title, content, user_id)
+values ('제목5', '내용5', 2);
