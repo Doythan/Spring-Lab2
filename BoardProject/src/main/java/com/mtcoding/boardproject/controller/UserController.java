@@ -39,4 +39,11 @@ public class UserController {
         session.setAttribute("sessionUser", sessionUser);
         return "redirect:/board";
     }
+
+    @GetMapping("/logout")
+    public String logout() {
+        session.invalidate();  // 통으로 날리는 것
+//        session.removeAttribute("sessionUser");  // key값만 날리는거
+        return "redirect:/board";
+    }
 }

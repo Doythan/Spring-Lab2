@@ -11,6 +11,10 @@ import org.springframework.stereotype.Repository;
 public class UserJpaRepository {
     private final EntityManager em;
 
+    public User findById(int id) {
+        return em.find(User.class, id);
+    }
+
     public User findByUsername(String username) {
 
         try {
