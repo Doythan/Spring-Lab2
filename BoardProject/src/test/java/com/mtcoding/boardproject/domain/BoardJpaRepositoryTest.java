@@ -24,7 +24,7 @@ public class BoardJpaRepositoryTest {
         List<Board> boardList = boardJpaRepository.findAll();
         // Lazy loading
         System.out.println("lazy loading start");
-        String email = boardList.get(2).getUser().getEmail();
+        String email = boardList.get(0).getUser().getEmail();
         System.out.println("email: " + email);
     }
 }

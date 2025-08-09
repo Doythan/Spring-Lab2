@@ -17,6 +17,6 @@ public class UserJpaRepositoryTest {
     @Test
     public void cache_test() {
         User u1 = userJpaRepository.findById(1);
-        User u2 = userJpaRepository.findById(1);
+        User u2 = userJpaRepository.findById(5);
     }
 }
