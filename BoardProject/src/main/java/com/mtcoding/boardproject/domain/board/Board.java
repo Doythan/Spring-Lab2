@@ -26,7 +26,7 @@ public class Board {
         this.user = user;
     }
 
-    // 의미 있는 이름으로 getter를 만들기 (어노테이션 안붙이는 이유)
+    // 의미 있는 이름으로 setter를 만들기 (어노테이션 안붙이는 이유)
     public void update(String title, String content) {
         this.title = title;
         this.content = content;
