@@ -5,7 +5,9 @@ import com.mtcoding.boardproject.controller.dto.BoardListResponseDTO;
 import com.mtcoding.boardproject.controller.dto.BoardSaveRequestDTO;
 import com.mtcoding.boardproject.controller.dto.BoardUpdateRequestDTO;
 import com.mtcoding.boardproject.domain.board.BoardService;
+import com.mtcoding.boardproject.domain.user.User;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,7 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
+    private final HttpSession session;
 
     // 게시글 목록 페이지 컨트롤러
     @GetMapping("/board")
@@ -115,6 +118,10 @@ public class BoardController {
 
     @GetMapping("/board/{id}/update-form")
     public String updateForm(@PathVariable("id") int id, HttpServletRequest request) {
+        User sessionUser = (User) session.getAttribute("sessionUser");
+
+        if (sessionUser == null) throw new RuntimeException("로그인 하세요");
+
         BoardDetailResponseDTO resDTO = boardService.게시글상세(id);
         request.setAttribute("model", resDTO);
         return "board/update-form";
@@ -123,21 +130,31 @@ public class BoardController {
     // 게시글 저장
     @PostMapping("/board/save")
     public String save(BoardSaveRequestDTO reqDTO) {
-        boardService.게시글쓰기(reqDTO);
+        User sessionUser = (User) session.getAttribute("sessionUser");
+
+        if (sessionUser == null) throw new RuntimeException("로그인 하세요");
+        boardService.게시글쓰기(reqDTO, sessionUser);
         return "redirect:/board";
     }
 
     // 게시글 삭제
     @PostMapping("/board/{id}/delete")
     public String delete(@PathVariable("id") int id) {
-        boardService.게시글삭제(id);
+        User sessionUser = (User) session.getAttribute("sessionUser");
+
+        if (sessionUser == null) throw new RuntimeException("로그인 하세요");
+
+        boardService.게시글삭제(id, sessionUser);
         return "redirect:/board";
     }
 
     // 게시글 수정
     @PostMapping("/board/{id}/update")
     public String update(@PathVariable("id") int id, BoardUpdateRequestDTO reqDTO) {
-        boardService.게시글수정(id, reqDTO);
+        User sessionUser = (User) session.getAttribute("sessionUser");
+
+        if (sessionUser == null) throw new RuntimeException("로그인 하세요");
+        boardService.게시글수정(id, reqDTO, sessionUser);
         return "redirect:/board/" + id;
     }
 

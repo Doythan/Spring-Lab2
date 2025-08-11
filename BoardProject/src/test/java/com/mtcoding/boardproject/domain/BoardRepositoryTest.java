@@ -1,7 +1,6 @@
 package com.mtcoding.boardproject.domain;
 
 import com.mtcoding.boardproject.domain.board.Board;
-import com.mtcoding.boardproject.domain.board.BoardRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
